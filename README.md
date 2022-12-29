@@ -12,7 +12,7 @@ Dentre as formas de obter o dado necessário e inseri-lo em nosso banco de dados
 
 Pensando em causar o mínimo de operações possíveis e apenas quando fosse necessário, optamos por adotar uma solução que por meio de uma trigger que será acionada sempre que houver uma inserção no banco de dados, ativasse uma procedure que irá enviar a partir do SQL  os dados para uma api externa.
 
-## Primeiramente vamos criar uma tabela que servira de teste para nossa aplicação e inserir os valores.
+Primeiramente vamos criar uma tabela que servira de teste para nossa aplicação e inserir os valores.
 
 ```sql
 create table professores (
