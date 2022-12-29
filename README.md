@@ -38,7 +38,7 @@ SELECT TOP (1000)
   FROM [professores].[dbo].[professores]
 ```
   
-## Uma vez criada a tabela devemos ativar as Ole Automation Procedures:
+ Uma vez criada a tabela devemos ativar as Ole Automation Procedures:
   
 ## Ole Automation
   
