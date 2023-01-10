@@ -1,16 +1,6 @@
 # Como enviar uma requisição POST pelo SQL
 
-## Primeira TASK
-
-E aew.
-
-Bom sem me alongar muito, estou migrando de carreira como muita gente por ai, recebi uma oportunidade FODA e depois de uns 3 dias de muito desespero, café(nunca tomei mas parece que isso vem com a profissão nova), lagrimas, mais desespero finalmente um dia de glória =D. 
-
-Concluí minha primeira task no trampo, bom esse foi um marco nessa nova carreira, e gostaria de registrar com o meu primeiro post aqui, então tá aqui um post sobre post a partir do MSSQL.
-
-Imagino que devem haver formas mais simples, performáticas, complexas… enfim, tem uma área de comentário ai e me ajudaria muito cada conselho.
-
-Chega de frescura, vamos a task…
+## Visão geral da TASK
 
 Precisamos obter os dados de cada nova inserção no banco do cliente e envia-la para uma api externa… simples porém não podemos comprometer a performance do banco de dados do cliente então devemos inserir o mínimo possível de código e ativar a procedure o mínimo de vezes possível.
 
@@ -23,6 +13,7 @@ Então optamos por utilizar uma trigger, que a cada novo INSERT, irá ativar a n
 Depois de alguma pesquisa pude encontrar que o Win32::OLE module não pode ser utilizado em Linux por usar Windows API, por sorte neste projeto este não era um requisito então pude abandonar a ideia de seguir no docker. 
 
 ### Ativar Ole Automation
+OLE Automation é mecanismo para a comunicação entre processos baseado em Component Object Model introduzido pela Microsoft. Ele fornece uma infraestrutura na qual aplicações podem acessar e manipular dados compartilhados que são exportados por outras aplicações.
 
 Caso queira se aprofundar mais no tema de OLE, indico este artigo [https://www.devmedia.com.br/artigo-sql-magazine-11-how-to-usando-objetos-ole-via-sql-server/7457](https://www.devmedia.com.br/artigo-sql-magazine-11-how-to-usando-objetos-ole-via-sql-server/7457)
 
