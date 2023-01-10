@@ -36,7 +36,6 @@ sp_helpsrvrolemember @srvrolename='sysadmin'
 GO
 ```
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/405d9a64-91b1-45ac-9b02-85f29355cdbc/Untitled.png)
 
 Feito isso, então ativamos os OLE 
 
