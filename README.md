@@ -1,18 +1,66 @@
-# Como mandar uma requisição POST pelo SQL
+# Como enviar uma requisição POST pelo SQL
 
-## Objetivo
+## Primeira TASK
 
-Dentro do escopo do nosso projeto, havia a necessidade de obter os novos registros inseridos no banco de dados do cliente.
+E aew.
 
-## Contexto
+Bom sem me alongar muito, estou migrando de carreira como muita gente por ai, recebi uma oportunidade FODA e depois de uns 3 dias de muito desespero, café(nunca tomei mas parece que isso vem com a profissão nova), lagrimas, mais desespero finalmente um dia de glória =D. 
 
-Dentre as formas de obter o dado necessário e inseri-lo em nosso banco de dados, devemos considerar que estamos inserindo códigos dentro do banco de dados do nosso cliente portanto devemos inserir o mínimo de código possível para que não interferisse na performance atual do banco.
+Concluí minha primeira task no trampo, bom esse foi um marco nessa nova carreira, e gostaria de registrar com o meu primeiro post aqui, então tá aqui um post sobre post a partir do MSSQL.
 
-## Solução
+Imagino que devem haver formas mais simples, performáticas, complexas… enfim, tem uma área de comentário ai e me ajudaria muito cada conselho.
 
-Pensando em causar o mínimo de operações possíveis e apenas quando fosse necessário, optamos por adotar uma solução que por meio de uma trigger que será acionada sempre que houver uma inserção no banco de dados, ativasse uma procedure que irá enviar a partir do SQL  os dados para uma api externa.
+Chega de frescura, vamos a task…
 
-Primeiramente vamos criar uma tabela que servira de teste para nossa aplicação e inserir os valores.
+Precisamos obter os dados de cada nova inserção no banco do cliente e envia-la para uma api externa… simples porém não podemos comprometer a performance do banco de dados do cliente então devemos inserir o mínimo possível de código e ativar a procedure o mínimo de vezes possível.
+
+Então optamos por utilizar uma trigger, que a cada novo INSERT, irá ativar a nossa procedure.
+
+ E o primeiro desafio foi ativar os OLE Automation dentro de uma imagem do MSSQL no Docker….
+
+## Está solução não funciona no Docker
+
+Depois de alguma pesquisa pude encontrar que o Win32::OLE module não pode ser utilizado em Linux por usar Windows API, por sorte neste projeto este não era um requisito então pude abandonar a ideia de seguir no docker. 
+
+### Ativar Ole Automation
+
+Caso queira se aprofundar mais no tema de OLE, indico este artigo [https://www.devmedia.com.br/artigo-sql-magazine-11-how-to-usando-objetos-ole-via-sql-server/7457](https://www.devmedia.com.br/artigo-sql-magazine-11-how-to-usando-objetos-ole-via-sql-server/7457)
+
+Primeiro devemos garantir que estamos utilizando um user que pertença a server role admin.
+
+Com o comando:
+
+```sql
+sp_helpsrvrolemember @srvrolename='sysadmin'
+
+GO
+```
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/405d9a64-91b1-45ac-9b02-85f29355cdbc/Untitled.png)
+
+Feito isso, então ativamos os OLE 
+
+```sql
+sp_configure 'show advanced options', 1;
+GO
+RECONFIGURE;
+GO
+sp_configure 'Ole Automation Procedures', 1;
+GO
+RECONFIGURE;
+GO
+```
+
+Obtendo o seguinte retorno:
+
+“
+
+A opção de configuração 'show advanced options' foi alterada de 1 para 1. Execute a instrução RECONFIGURE para instalar.
+A opção de configuração 'Ole Automation Procedures' foi alterada de 1 para 1. Execute a instrução RECONFIGURE para instalar.
+
+“
+
+Podemos agora criar a tabela em que realizaremos os testes
 
 ```sql
 create table professores (
@@ -37,23 +85,12 @@ SELECT TOP (1000)
       ,[data_cadastro]
   FROM [professores].[dbo].[professores]
 ```
-  
- Uma vez criada a tabela devemos ativar as Ole Automation Procedures:
-  
-## Ole Automation
-  
-```sql
-  sp_configure 'show advanced options', 1;
-GO
-RECONFIGURE;
-GO
-sp_configure 'Ole Automation Procedures', 1;
-GO
-RECONFIGURE;
-GO
-```
 
-## Criar Trigger
+### Porque uma trigger??
+
+Além dele ser ativado apenas quando necessário, ele nos permite utilizar como fonte de busca a tabela INSERTED, quando uma trigger é ativada são geradas 2 tabelas temporárias INSERTED e DELETED, onde respectivamente consta todos os valores que foram inseridos pela trigger e deletados.
+
+### Trigger
 
 ```sql
 CREATE TRIGGER TesteBody
@@ -65,7 +102,11 @@ BEGIN
 END
 ```
 
-## Procedure
+E aqui um novo problema…
+
+Não foi possível realizar uma busca mais otimizada dentro da tabela INSERTED, pois o MSSQL não permite que seja realizado um SELECT com mais de um resultado, então optei por realizar um SELECT para cada informação e atribui-la a uma variável. 
+
+Procedure
 
 ```sql
 	
@@ -106,11 +147,17 @@ END
 
 	EXEC sp_OADestroy @Object
 ```
-Para montar esta procedure utilizei como fonte os seguintes posts:
-https://www.botreetechnologies.com/blog/how-to-fire-a-web-request-from-microsoft-sql-server/
-https://www.zealousweb.com/calling-rest-api-from-sql-server-stored-procedure/
 
-Tive alguma dificuldade em configurar objeto enviado para a api e graças ao seguinte vídeo consegui resolver:
-https://www.youtube.com/watch?v=GFeR9m_AtpI&t=2240s
+Pelo código acima nós declaramos na variavel @URL qual o endpoint que será chamado, e qual o método será utilizado, como estamos enviando informações para uma api, utilizamos o método POST.
 
+Dentro da variável @Body, criei um arquivo json e atribui os valores com o JSON_MODIFY.
 
+Então, uma vez a trigger criada podemos adicionar um novo registro e verificar que a informação é enviada.
+
+## Referencias
+
+[https://www.botreetechnologies.com/blog/how-to-fire-a-web-request-from-microsoft-sql-server/](https://www.botreetechnologies.com/blog/how-to-fire-a-web-request-from-microsoft-sql-server/)
+
+[https://www.zealousweb.com/calling-rest-api-from-sql-server-stored-procedure/](https://www.zealousweb.com/calling-rest-api-from-sql-server-stored-procedure/)
+
+[https://www.youtube.com/watch?v=GFeR9m_AtpI&t=2240s](https://www.youtube.com/watch?v=GFeR9m_AtpI&t=2240s)
